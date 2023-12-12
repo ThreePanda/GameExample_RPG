@@ -41,11 +41,15 @@ public class MouseManager : MonoBehaviour
                 case "Ground":
                     Cursor.SetCursor(point,new Vector2(0,0),CursorMode.Auto);
                     break;
+                case "Enemy":
+                    Cursor.SetCursor(attack,new Vector2(0,0),CursorMode.Auto);
+                    break;
             }
         }
     }
     //范型委托——事件
     public event Action<Vector3> OnMouseClicked;
+    public event Action<GameObject> OnEnemyClicked; 
     //System下的event关键字，声明Action类，传入Vector3 
     //其他的函数可以注册到Action的类中，当该类的实例被Invoke后，会将传入变量依次传给已注册的函数，令其执行
     void MouseControl()
@@ -56,6 +60,10 @@ public class MouseManager : MonoBehaviour
             {
                 OnMouseClicked?.Invoke(_hitinfo.point);
                 //? : if the event is not NULL ,then start the next function
+            }
+            if (_hitinfo.collider.gameObject.CompareTag("Enemy"))
+            {
+                OnEnemyClicked?.Invoke(_hitinfo.collider.gameObject);
             }
         }
     }
