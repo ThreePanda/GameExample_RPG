@@ -1,17 +1,21 @@
-using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Random = UnityEngine.Random;
 
 public class PlayerController : MonoBehaviour
 {
     private NavMeshAgent _agent;
     private Animator _animator;
+    private CharacterStats _characterStats;
+    private bool _isDead;
+    private GameObject _attackEnemy;
+    private float _lastAttackTime;
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
         _animator = GetComponent<Animator>();
+        _characterStats = GetComponent<CharacterStats>();
     }
 
     private void Start()
@@ -21,26 +25,31 @@ public class PlayerController : MonoBehaviour
         MouseManager.Instance.OnEnemyClicked += Event_AttackEnemy;
     }
 
-    private GameObject _attackEnemy;
-    private float _lastAttackTime;
+    
+    private void Update()
+    {
+        //死亡判断
+        _isDead = _characterStats.CurrentHealth == 0;
+        SwitchAnimation();
+        //攻击CD冷却衰减
+        _lastAttackTime -= Time.deltaTime;
+    } 
+    private void SwitchAnimation()
+    {
+        _animator.SetFloat("Speed", _agent.velocity.sqrMagnitude);
+        _animator.SetBool("Death",_isDead);
+    }
     private void Event_AttackEnemy(GameObject target)
     {
         if (target != null)
         {
             _attackEnemy = target;
         }
+        //TODO:鼠标每点击敌人一次，Coroutine就会执行一次，浪费资源，违背协程的刷新机制
         StartCoroutine(MoveToAttackTarget());
         //启用迭代器返回值的函数内的循环(yield return)，每帧执行。（等于在update内执行）
         //参考Coroutines的手册
     }
-
-    private void Update()
-    {
-        SwitchAnimation();
-        //攻击CD冷却衰减
-        _lastAttackTime -= Time.deltaTime;
-    }
-
     private void MoveToTarget(Vector3 target)
     {
         //恢复攻击设置的停止
@@ -50,11 +59,13 @@ public class PlayerController : MonoBehaviour
         _agent.destination = target;
     }
 
-    IEnumerator MoveToAttackTarget()
+    private IEnumerator MoveToAttackTarget()
     {
-        //transform.LookAt(_attackEnemy.transform);
-        while (Vector3.Distance(_attackEnemy.transform.position,transform.position) > 1)
-        {//当人物与敌人的距离大于1时，控制人物移动到敌人处(1参考了Play的提前停止参数)TODO:根据武器修改参数
+        //当人物与敌人的距离大于攻击距离+敌人半径时，控制人物移动到敌人处
+        //加敌人半径是因为当攻击距离 < 目标碰撞体半径时会导致死循环
+        while (Vector3.Distance(_attackEnemy.transform.position,transform.position) 
+               > _characterStats.attackData.attackRange + _attackEnemy.GetComponent<NavMeshAgent>().radius)
+        {
             _agent.isStopped = false;
             _agent.destination = _attackEnemy.transform.position;
             yield return null;
@@ -64,17 +75,31 @@ public class PlayerController : MonoBehaviour
             //提高输出的效率，本质与先保存所有值然后再输出的速度无异
         }
         _agent.isStopped = true;
+        Attack();
+    }
 
+    void Attack()
+    {
         if (_lastAttackTime < 0)
         {
-            _animator.SetTrigger("Attack");
             //重置攻击CD
-            _lastAttackTime = 0.5f;
+            _lastAttackTime = _characterStats.attackData.coolDown;
+            //暴击判断
+            //Random.value的值视为百分数，小于给定的暴击率则表明命中暴击概率
+            _characterStats.isCritical = 
+                Random.value < _characterStats.attackData.criticalChance;
+            _animator.SetBool("Critical",_characterStats.isCritical);
+            _animator.SetTrigger("Attack");
         }
     }
 
-    private void SwitchAnimation()
+   
+    
+    //Animation Event
+    void Hit()
     {
-        _animator.SetFloat("Speed", _agent.velocity.sqrMagnitude);
+        //Enemy在点击的Event事件中已经赋值
+        var targetStats = _attackEnemy.GetComponent<CharacterStats>();
+        targetStats.TakeDamage(_characterStats, targetStats);
     }
 }
