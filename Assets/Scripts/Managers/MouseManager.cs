@@ -9,23 +9,8 @@ using UnityEngine;
  * public class EventVector3 : UnityEvent<Vector3> {}
  */
 
-public class MouseManager : MonoBehaviour
+public class MouseManager : Singleton<MouseManager>
 {
-    //创建单例模式
-    public static MouseManager Instance;
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            //如果检查发现已存在MouseManager的实例，遵从单例原则，删除当前创建的实例，使用之前已有的实例
-        }
-        else
-        {
-            Instance = this;
-        }
-    } 
-    
     //接受摄像机发出的射线的撞击信息
     private RaycastHit _hitinfo;
     public Texture2D point, doorway, attack, target, arrow;

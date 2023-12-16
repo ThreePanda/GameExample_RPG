@@ -1,35 +1,51 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Mathematics;
 using UnityEngine;
+using UnityEngine.Serialization;
 using Random = UnityEngine.Random;
 
 public class CharacterStats : MonoBehaviour
 {
-    public CharacterData_SO CharacterData;
-    public AttackData_SO attackData;
-    [HideInInspector] public bool isCritical;
-    #region Read from Data_SO
+    //设定一个模板，每一个角色从这个模板中复制一份，避免“全图秒杀”
+    public CharacterData_SO templateData;
     
+    public AttackData_SO attackData;
+    
+    [HideInInspector]public bool isCritical;
+    [HideInInspector]public CharacterData_SO characterData;
+    
+    #region Read from Data_SO
+
+    private void Awake()
+    {
+        //基础值模板赋值
+        if (templateData != null)
+        {
+            characterData = Instantiate(templateData);
+        }
+    }
+
     public int MaxHealth
         {
-            get => CharacterData != null ? CharacterData.maxHealth : 0;
-            set => CharacterData.maxHealth = value;
+            get => characterData != null ? characterData.maxHealth : 0;
+            set => characterData.maxHealth = value;
         }
         public int CurrentHealth
         {
-            get => CharacterData != null ? CharacterData.currentHealth : 0;
-            set => CharacterData.currentHealth = value;
+            get => characterData != null ? characterData.currentHealth : 0;
+            set => characterData.currentHealth = value;
         }
         public int BaseDefence
         {
-            get => CharacterData != null ? CharacterData.baseDefence : 0;
-            set => CharacterData.baseDefence = value;
+            get => characterData != null ? characterData.baseDefence : 0;
+            set => characterData.baseDefence = value;
         }
         public int CurrentDefence
         {
-            get => CharacterData != null ? CharacterData.currentDefence : 0;
-            set => CharacterData.currentDefence = value;
+            get => characterData != null ? characterData.currentDefence : 0;
+            set => characterData.currentDefence = value;
         }
 
     #endregion

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -23,6 +24,7 @@ public class PlayerController : MonoBehaviour
         //将移动的事件注册到单例的event事件OnMouseCliked中，随事件唤醒调用
         MouseManager.Instance.OnMouseClicked += MoveToTarget;
         MouseManager.Instance.OnEnemyClicked += Event_AttackEnemy;
+        GameManager.Instance.RegisterPlayer(_characterStats);
     }
 
     
@@ -41,6 +43,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Event_AttackEnemy(GameObject target)
     {
+        if (_isDead) return;
         if (target != null)
         {
             _attackEnemy = target;
@@ -52,6 +55,7 @@ public class PlayerController : MonoBehaviour
     }
     private void MoveToTarget(Vector3 target)
     {
+        if (_isDead) return;
         //恢复攻击设置的停止
         _agent.isStopped = false;
         //打断攻击移动导航
@@ -82,6 +86,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_lastAttackTime < 0)
         {
+            transform.LookAt(_attackEnemy.transform);
             //重置攻击CD
             _lastAttackTime = _characterStats.attackData.coolDown;
             //暴击判断
@@ -92,7 +97,6 @@ public class PlayerController : MonoBehaviour
             _animator.SetTrigger("Attack");
         }
     }
-
    
     
     //Animation Event
