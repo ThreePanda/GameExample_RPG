@@ -51,20 +51,26 @@ public class CharacterStats : MonoBehaviour
     #endregion
 
     #region Character Combat
-
-     public void TakeDamage(CharacterStats attacker, CharacterStats defender)
+    //Character to character
+    public void TakeDamage(CharacterStats attacker, CharacterStats defender)
     {
         //避免产生负值
-        int damage = Mathf.Max(attacker.CurrentDamage() - defender.CurrentDefence, 0);
+        int damage = Mathf.Max(attacker.CurrentDamage() - defender.CurrentDefence, 1);
         CurrentHealth = Mathf.Max(CurrentHealth - damage, 0);
-        Debug.Log("GetHurt:"+defender.gameObject.tag+"  Damage:"+damage+"  CurrentHealth:"+CurrentHealth);
+        print("GetHurt:"+defender.gameObject.tag+"  Damage:"+damage+"  CurrentHealth:"+CurrentHealth);
         if (attacker.isCritical)
         {
             defender.GetComponent<Animator>().SetTrigger("Hit");
         }
         //TODO:人物UI，经验收集
     }
-
+    //Object to character
+    public void TakeDamage(int damage, CharacterStats defender)
+    {
+        int currentDamage = Mathf.Max(damage - defender.CurrentDefence, 1);
+        CurrentHealth = Mathf.Max(CurrentHealth - currentDamage, 0);
+        print("GetHurt:"+defender.gameObject.tag+"  Damage:"+damage+"  CurrentHealth:"+CurrentHealth);
+    }
     private int CurrentDamage()
     {
         float coreDamage = Random.Range(attackData.minDamage, attackData.maxDamage);

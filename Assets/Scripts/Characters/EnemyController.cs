@@ -16,10 +16,10 @@ public enum EnemyStates
 //检查对应的Component是否存在，若不存在自动添加
 public class EnemyController : MonoBehaviour,IEndGameObserver
 {
-    private CharacterStats _characterStats;
+    protected CharacterStats _characterStats;
     
     private NavMeshAgent _agent;
-    protected EnemyStates _enemyStates;
+    private EnemyStates _enemyStates;
     protected GameObject attackTarget;
     private Animator _animator;
     private Quaternion _guardRotation;
@@ -81,9 +81,8 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
     {
         //死亡判断
         _isDead = _characterStats.CurrentHealth == 0;
-        
-        SwitchStates();
         SwitchAnimation();
+        SwitchStates();
         //攻击冷却
         _lastAttackTime -= Time.deltaTime;
     }
@@ -105,6 +104,7 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
     {
         if (_remainWaitTime >= 0)
         {
+            //print("需等待！" + _remainWaitTime);
             _remainWaitTime -= Time.deltaTime;
             return true;
         }
@@ -167,6 +167,7 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
                 //是否到达随机巡逻点
                 if (Vector3.Distance(transform.position, _wayPoint) <= _agent.stoppingDistance)
                 {
+                    //print("到达巡逻点！");
                     _isWalk = false;
                     if (!Await())
                     {
@@ -185,6 +186,7 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
                 _agent.speed = _chaseAgentSpeed;
                 if (!FoundPlayer())
                 {
+                    _agent.isStopped = false;
                     _isChase = false;
                     _isFollow = false;
                     _agent.destination = transform.position;
@@ -202,12 +204,15 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
                     //是否已经进入攻击范围
                     if (!TargetInSkillRange() && !TargetInAttackRange())
                     {
+                        //_agent.isStopped = false;
                         _isFollow = true;
                         _agent.destination = attackTarget.transform.position;
                     }
                     else
                     {   
                         _isFollow = false;
+                        _agent.destination = transform.position;
+                        //_agent.isStopped = true;
                         if (_lastAttackTime < 0)
                         {
                             _lastAttackTime = _characterStats.attackData.coolDown;
@@ -244,11 +249,11 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
     {
         //using Hit function(Animation Event) to control the Health of Player and Monster
         transform.LookAt(attackTarget.transform);
-        if (TargetInSkillRange())
+        if (TargetInSkillRange() && !TargetInAttackRange())
         {
             _animator.SetTrigger("Skill");
         }
-        else if (TargetInAttackRange())
+        else
         {
             _animator.SetTrigger("Attack");
         }
@@ -301,12 +306,14 @@ public class EnemyController : MonoBehaviour,IEndGameObserver
             randomZ + _guradPos.z);
         //一个最接近目标点且在NavMesh中的点的信息
         _wayPoint = NavMesh.SamplePosition(randomPoint, out var hit, patrolRange, 1) ? hit.position : transform.position;
+        //print("获取新位置：" + _wayPoint);
     }
     //Animation Event
     void Hit()
     {
         //离开攻击范围即停止，避免空引用和拉怪被攻击
         if (!TargetInAttackRange() && !TargetInSkillRange()) return;
+        if (!transform.IsFacingTarget(attackTarget.transform)) return;
         
         var targetStats = attackTarget.GetComponent<CharacterStats>();
         targetStats.TakeDamage(_characterStats, targetStats);
