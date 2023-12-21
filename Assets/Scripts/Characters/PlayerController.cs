@@ -68,7 +68,7 @@ public class PlayerController : MonoBehaviour
     {
         //当人物与敌人的距离大于攻击距离+敌人半径时，控制人物移动到敌人处
         //加敌人半径是因为当攻击距离 < 目标碰撞体半径时会导致死循环
-        //TODO:因为Rock没有NavMeshAgent导致报错，距离判断radius需要修改
+        //因为Rock没有NavMeshAgent导致报错，距离判断radius已修改
         while (Vector3.Distance(_attackEnemy.transform.position,transform.position) 
                > _characterStats.attackData.attackRange 
                + (_attackEnemy.CompareTag("Enemy") ? _attackEnemy.GetComponent<NavMeshAgent>().radius : 1))

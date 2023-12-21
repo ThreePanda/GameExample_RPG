@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 public class GameManager : Singleton<GameManager>
 {
-    private CharacterStats _playerStats;
+    public CharacterStats playerStats;
     private List<IEndGameObserver> _endGameObservers = new();
 
     // private void OnEnable()
@@ -25,7 +25,7 @@ public class GameManager : Singleton<GameManager>
 
     private void Update()
     {
-        if (_playerStats.CurrentHealth == 0)
+        if (playerStats.CurrentHealth == 0)
         {
             NotifyObserver();
         }
@@ -33,7 +33,7 @@ public class GameManager : Singleton<GameManager>
 
     public void RegisterPlayer(CharacterStats player)
     {
-        _playerStats = player;
+        playerStats = player;
     }
 
     public void AddObserver(IEndGameObserver observer)

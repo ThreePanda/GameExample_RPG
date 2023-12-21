@@ -236,6 +236,7 @@ GameObject:
   - component: {fileID: 2864389297747219830}
   - component: {fileID: 8764520352275598573}
   - component: {fileID: 6134966256065524857}
+  - component: {fileID: 5582750132196519422}
   m_Layer: 0
   m_Name: GruntPolyart
   m_TagString: Enemy
@@ -258,6 +259,7 @@ Transform:
   m_Children:
   - {fileID: 8170447436580636686}
   - {fileID: 18516946369917698}
+  - {fileID: 5511361975773871020}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!95 &4051130622875358712
@@ -358,6 +360,23 @@ MonoBehaviour:
   waitTime: 3
   patrolRange: 5
   kickForce: 10
+--- !u!114 &5582750132196519422
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 860344429113725368}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a49d1c7ba33f842f4b87ca837d7c8f0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  healthUIPrefab: {fileID: 3756631222187711545, guid: 18c57d16435c14d7dbcb810636391433,
+    type: 3}
+  barPoint: {fileID: 5511361975773871020}
+  alwaysVisible: 0
+  visibleTime: 5
 --- !u!1 &2260000721836239805
 GameObject:
   m_ObjectHideFlags: 0
@@ -757,6 +776,37 @@ Transform:
   - {fileID: 8963992999692822170}
   - {fileID: 1294108991927485335}
   - {fileID: 3248706376942014739}
+  m_Father: {fileID: 8678152156042368133}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &6679230396861000372
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5511361975773871020}
+  m_Layer: 0
+  m_Name: HealthBar Point
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5511361975773871020
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6679230396861000372}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 2.8, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
   m_Father: {fileID: 8678152156042368133}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7557872169345452998
