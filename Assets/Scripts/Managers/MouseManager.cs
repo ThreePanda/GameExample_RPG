@@ -14,6 +14,12 @@ public class MouseManager : Singleton<MouseManager>
     //接受摄像机发出的射线的撞击信息
     private RaycastHit _hitinfo;
     public Texture2D point, doorway, attack, target, arrow;
+    protected override void Awake()
+    {
+        base.Awake();
+        //避免类在新场景加载中被销毁，导致其后的流程无法进行
+        DontDestroyOnLoad(this);
+    }
     void SetCursorTexture()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -28,6 +34,9 @@ public class MouseManager : Singleton<MouseManager>
                     break;
                 case "Enemy":
                     Cursor.SetCursor(attack,new Vector2(0,0),CursorMode.Auto);
+                    break;
+                case "Portal":
+                    Cursor.SetCursor(doorway,new Vector2(0,0),CursorMode.Auto);
                     break;
             }
         }
@@ -45,6 +54,10 @@ public class MouseManager : Singleton<MouseManager>
             {
                 OnMouseClicked?.Invoke(_hitinfo.point);
                 //? : if the event is not NULL ,then start the next function
+            }
+            if (_hitinfo.collider.gameObject.CompareTag("Portal"))
+            {
+                OnMouseClicked?.Invoke(_hitinfo.point);
             }
             if (_hitinfo.collider.gameObject.CompareTag("Enemy"))
             {

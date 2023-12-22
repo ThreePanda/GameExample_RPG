@@ -100,6 +100,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneName: 
   transitionType: 0
+  destinationTag: 0
 --- !u!65 &5853197404608033367
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -119,8 +120,8 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 2.5}
-  m_Center: {x: 0, y: 0, z: 0}
+  m_Size: {x: 1, y: 0.23362145, z: 4}
+  m_Center: {x: 0, y: -0.38318986, z: 0}
 --- !u!1 &6348650441644368149
 GameObject:
   m_ObjectHideFlags: 0
@@ -165,3 +166,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a9af0aaf79c494fa4b7b26714ae821a3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  destinationTag: 0

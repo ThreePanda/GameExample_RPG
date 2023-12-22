@@ -20,15 +20,26 @@ public class PlayerController : MonoBehaviour
         _characterStats = GetComponent<CharacterStats>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
         //将移动的事件注册到单例的event事件OnMouseCliked中，随事件唤醒调用
         MouseManager.Instance.OnMouseClicked += MoveToTarget;
         MouseManager.Instance.OnEnemyClicked += Event_AttackEnemy;
+    }
+
+    private void Start()
+    {
         GameManager.Instance.RegisterPlayer(_characterStats);
     }
 
-    
+    private void OnDisable()
+    {
+        if (!MouseManager.isInitialize) return;
+        MouseManager.Instance.OnMouseClicked -= MoveToTarget;
+        MouseManager.Instance.OnEnemyClicked -= Event_AttackEnemy;
+    }
+
+
     private void Update()
     {
         //死亡判断
