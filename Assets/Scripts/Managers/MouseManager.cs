@@ -9,26 +9,17 @@ using UnityEngine;
  * public class EventVector3 : UnityEvent<Vector3> {}
  */
 
-public class MouseManager : MonoBehaviour
+public class MouseManager : Singleton<MouseManager>
 {
-    //创建单例模式
-    public static MouseManager Instance;
-    private void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            //如果检查发现已存在MouseManager的实例，遵从单例原则，删除当前创建的实例，使用之前已有的实例
-        }
-        else
-        {
-            Instance = this;
-        }
-    } 
-    
     //接受摄像机发出的射线的撞击信息
     private RaycastHit _hitinfo;
     public Texture2D point, doorway, attack, target, arrow;
+    protected override void Awake()
+    {
+        base.Awake();
+        //避免类在新场景加载中被销毁，导致其后的流程无法进行
+        DontDestroyOnLoad(this);
+    }
     void SetCursorTexture()
     {
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -43,6 +34,9 @@ public class MouseManager : MonoBehaviour
                     break;
                 case "Enemy":
                     Cursor.SetCursor(attack,new Vector2(0,0),CursorMode.Auto);
+                    break;
+                case "Portal":
+                    Cursor.SetCursor(doorway,new Vector2(0,0),CursorMode.Auto);
                     break;
             }
         }
@@ -61,7 +55,15 @@ public class MouseManager : MonoBehaviour
                 OnMouseClicked?.Invoke(_hitinfo.point);
                 //? : if the event is not NULL ,then start the next function
             }
+            if (_hitinfo.collider.gameObject.CompareTag("Portal"))
+            {
+                OnMouseClicked?.Invoke(_hitinfo.point);
+            }
             if (_hitinfo.collider.gameObject.CompareTag("Enemy"))
+            {
+                OnEnemyClicked?.Invoke(_hitinfo.collider.gameObject);
+            }
+            if (_hitinfo.collider.gameObject.CompareTag("Attackable"))
             {
                 OnEnemyClicked?.Invoke(_hitinfo.collider.gameObject);
             }

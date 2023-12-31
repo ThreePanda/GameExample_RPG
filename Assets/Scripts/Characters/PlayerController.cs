@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.AI;
@@ -11,6 +12,7 @@ public class PlayerController : MonoBehaviour
     private bool _isDead;
     private GameObject _attackEnemy;
     private float _lastAttackTime;
+    private float _stopDistance;
     private void Awake()
     {
         _agent = GetComponent<NavMeshAgent>();
@@ -18,14 +20,26 @@ public class PlayerController : MonoBehaviour
         _characterStats = GetComponent<CharacterStats>();
     }
 
-    private void Start()
+    private void OnEnable()
     {
         //将移动的事件注册到单例的event事件OnMouseCliked中，随事件唤醒调用
         MouseManager.Instance.OnMouseClicked += MoveToTarget;
         MouseManager.Instance.OnEnemyClicked += Event_AttackEnemy;
     }
 
-    
+    private void Start()
+    {
+        GameManager.Instance.RegisterPlayer(_characterStats);
+    }
+
+    private void OnDisable()
+    {
+        if (!MouseManager.isInitialize) return;
+        MouseManager.Instance.OnMouseClicked -= MoveToTarget;
+        MouseManager.Instance.OnEnemyClicked -= Event_AttackEnemy;
+    }
+
+
     private void Update()
     {
         //死亡判断
@@ -41,6 +55,7 @@ public class PlayerController : MonoBehaviour
     }
     private void Event_AttackEnemy(GameObject target)
     {
+        if (_isDead) return;
         if (target != null)
         {
             _attackEnemy = target;
@@ -52,6 +67,7 @@ public class PlayerController : MonoBehaviour
     }
     private void MoveToTarget(Vector3 target)
     {
+        if (_isDead) return;
         //恢复攻击设置的停止
         _agent.isStopped = false;
         //打断攻击移动导航
@@ -63,8 +79,10 @@ public class PlayerController : MonoBehaviour
     {
         //当人物与敌人的距离大于攻击距离+敌人半径时，控制人物移动到敌人处
         //加敌人半径是因为当攻击距离 < 目标碰撞体半径时会导致死循环
+        //因为Rock没有NavMeshAgent导致报错，距离判断radius已修改
         while (Vector3.Distance(_attackEnemy.transform.position,transform.position) 
-               > _characterStats.attackData.attackRange + _attackEnemy.GetComponent<NavMeshAgent>().radius)
+               > _characterStats.attackData.attackRange 
+               + (_attackEnemy.CompareTag("Enemy") ? _attackEnemy.GetComponent<NavMeshAgent>().radius : 1))
         {
             _agent.isStopped = false;
             _agent.destination = _attackEnemy.transform.position;
@@ -82,6 +100,7 @@ public class PlayerController : MonoBehaviour
     {
         if (_lastAttackTime < 0)
         {
+            transform.LookAt(_attackEnemy.transform);
             //重置攻击CD
             _lastAttackTime = _characterStats.attackData.coolDown;
             //暴击判断
@@ -92,14 +111,26 @@ public class PlayerController : MonoBehaviour
             _animator.SetTrigger("Attack");
         }
     }
-
    
     
     //Animation Event
     void Hit()
     {
-        //Enemy在点击的Event事件中已经赋值
-        var targetStats = _attackEnemy.GetComponent<CharacterStats>();
-        targetStats.TakeDamage(_characterStats, targetStats);
+        if (_attackEnemy.CompareTag("Attackable"))
+        {
+            if (_attackEnemy.GetComponent<Rock>())
+            {
+                _attackEnemy.GetComponent<Rock>().rockStats = Rock.RockStats.HitEnemy;
+                //TODO:临时测试版：击飞力大小
+                _attackEnemy.GetComponent<Rigidbody>().velocity = Vector3.one;
+                _attackEnemy.GetComponent<Rigidbody>().AddForce(transform.forward * 20,ForceMode.Impulse);
+            }
+        }
+        else
+        {
+            //Enemy在点击的Event事件中已经赋值
+            var targetStats = _attackEnemy.GetComponent<CharacterStats>();
+            targetStats.TakeDamage(_characterStats, targetStats);
+        }
     }
 }
